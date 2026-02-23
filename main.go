@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"regexp"
 	"strings"
@@ -103,31 +102,31 @@ func (ii *InvertedIndex) TF_IDF(token string, docID int) float64 {
 	return tf * idf
 }
 
-func main() {
-	documents := []Document{
-		{ID: 1, Content: "The quick brown fox jumps over the lazy dog."},
-		{ID: 2, Content: "The lazy dog is sleeping."},
-		{ID: 3, Content: "The fox is quick and clever."},
-		{ID: 4, Content: "Dogs are loyal animals."},
-		{ID: 5, Content: "Foxes are wild animals."},
-	}
-	ii := &InvertedIndex{}
-	index := ii.Add(documents)
-	fmt.Println("Inverted Index:")
-	for token, docIDs := range index {
-		fmt.Printf("%s: %v\n", token, docIDs)
-	}
+// func main() {
+// 	documents := []Document{
+// 		{ID: 1, Content: "The quick brown fox jumps over the lazy dog."},
+// 		{ID: 2, Content: "The lazy dog is sleeping."},
+// 		{ID: 3, Content: "The fox is quick and clever."},
+// 		{ID: 4, Content: "Dogs are loyal animals."},
+// 		{ID: 5, Content: "Foxes are wild animals."},
+// 	}
+// 	ii := &InvertedIndex{}
+// 	index := ii.Add(documents)
+// 	fmt.Println("Inverted Index:")
+// 	for token, docIDs := range index {
+// 		fmt.Printf("%s: %v\n", token, docIDs)
+// 	}
 
-	ii.Search("the")
-	fmt.Println("\nSearch results for 'the':", ii.Search("the"))
-	ii.Search("fox")
-	fmt.Println("Search results for 'fox':", ii.Search("fox"))
-	ii.Search("dog")
-	fmt.Println("Search results for 'dog':", ii.Search("dog"))
+// 	ii.Search("the")
+// 	fmt.Println("\nSearch results for 'the':", ii.Search("the"))
+// 	ii.Search("fox")
+// 	fmt.Println("Search results for 'fox':", ii.Search("fox"))
+// 	ii.Search("dog")
+// 	fmt.Println("Search results for 'dog':", ii.Search("dog"))
 
-	fmt.Printf("\nTF-IDF for 'fox' in Document 1: %.4f\n", ii.TF_IDF("fox", 1))
-	fmt.Printf("TF-IDF for 'lazy' in Document 2: %.4f\n", ii.TF_IDF("lazy", 2))
-	fmt.Printf("TF-IDF for 'quick' in Document 3: %.4f\n", ii.TF_IDF("quick", 3))
-	fmt.Printf("TF-IDF for 'wild' in Document 5: %.4f\n", ii.TF_IDF("wild", 5))
+// 	fmt.Printf("\nTF-IDF for 'fox' in Document 1: %.4f\n", ii.TF_IDF("fox", 1))
+// 	fmt.Printf("TF-IDF for 'lazy' in Document 2: %.4f\n", ii.TF_IDF("lazy", 2))
+// 	fmt.Printf("TF-IDF for 'quick' in Document 3: %.4f\n", ii.TF_IDF("quick", 3))
+// 	fmt.Printf("TF-IDF for 'wild' in Document 5: %.4f\n", ii.TF_IDF("wild", 5))
 
-}
+// }

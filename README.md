@@ -12,16 +12,6 @@ This project explores the first stages of a search engine pipeline:
 - building an inverted index,
 - and scoring terms with TF-IDF.
 
-For HR reviewers, this demonstrates problem solving in backend systems, algorithms, and data processing.
-For engineering reviewers, the code shows working implementations of URL normalization, robots.txt checks, tokenization, stemming, postings-list indexing, and TF-IDF math.
-
-## Research Goal
-
-The main research question is:
-"How can a minimal Go codebase implement the essential building blocks of search, from crawl to relevance scoring?"
-
-The current implementation focuses on correctness of core ideas before optimization.
-
 ## What Is Implemented
 
 The project currently has two active tracks:

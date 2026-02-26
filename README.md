@@ -111,31 +111,5 @@ Crawling (Depth 2): https://go.dev
 - `main.go`: document model + indexing/retrieval/scoring logic.
 - `go.mod`: module/dependency definitions.
 
-## Current Limitations (Important For Reviewers)
 
-- Crawler and indexer are not yet connected in one pipeline.
-- Link extraction currently keeps only absolute `http...` links; many relative links are ignored.
-- Query path does not currently stem tokens, while indexing does stem; this can reduce match quality.
-- Search is single-term and does not yet rank final results by score.
-- No persistent storage (index is in-memory only).
-- No benchmark suite or unit tests yet.
-- Crawler is single-threaded (no concurrency in traversal).
 
-## Research Roadmap
-
-Planned next iterations:
-
-1. Connect crawler output to indexing pipeline end-to-end.
-2. Handle relative links before filtering to improve crawl coverage.
-3. Apply same normalization/stemming to query terms.
-4. Add ranked retrieval for multi-term queries.
-5. Add tests for tokenizer, index correctness, and TF-IDF calculations.
-6. Introduce evaluation metrics (precision@k, recall@k) on a small labeled dataset.
-7. Refactor into packages (`crawler`, `index`, `retrieval`, `scoring`) for maintainability.
-
-## Why This Project Is Valuable In Interviews
-
-- Shows understanding of core search engine concepts, not just framework usage.
-- Demonstrates backend engineering in Go with real parsing/networking libraries.
-- Makes tradeoffs visible (correctness-first prototype, then scaling roadmap).
-- Provides a clear path from academic IR concepts to practical implementation.

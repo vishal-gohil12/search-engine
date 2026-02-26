@@ -1,66 +1,96 @@
-# Search Engine in Go (Inverted Index + TF-IDF)
+# Go Search Engine Research Prototype
 
-This project is a simple learning implementation of a search engine core in Go.
-It includes:
+This repository is a research-oriented prototype of core search engine components implemented in Go.
+It is designed to show practical understanding of information retrieval basics and web crawling fundamentals, not to be a production search platform.
 
-- tokenization and normalization
-- inverted index creation
-- single-term search
-- TF-IDF scoring for a term in a specific document
+## Executive Summary
 
-## Project Structure
+This project explores the first stages of a search engine pipeline:
 
-- `main.go`: all logic (document model, indexing, search, TF-IDF, demo in `main`)
-- `go.mod`: Go module definition (`search-engine`)
+- collecting pages from the web (crawler),
+- processing text (normalization + stemming),
+- building an inverted index,
+- and scoring terms with TF-IDF.
 
-## How It Works
+For HR reviewers, this demonstrates problem solving in backend systems, algorithms, and data processing.
+For engineering reviewers, the code shows working implementations of URL normalization, robots.txt checks, tokenization, stemming, postings-list indexing, and TF-IDF math.
 
-### 1. Tokenization
+## Research Goal
 
-`tokenize(content string) []string`:
+The main research question is:
+"How can a minimal Go codebase implement the essential building blocks of search, from crawl to relevance scoring?"
 
-- converts text to lowercase
-- removes punctuation with regex: `[^\w\s]`
-- splits text into tokens using whitespace
+The current implementation focuses on correctness of core ideas before optimization.
 
-Example:
-`"The quick brown fox."` -> `["the", "quick", "brown", "fox"]`
+## What Is Implemented
 
-### 2. Inverted Index
+The project currently has two active tracks:
+
+- `crawler.go`: depth-limited same-domain crawler with robots.txt compliance checks.
+- `main.go`: text processing, inverted index creation, term lookup, and TF-IDF scoring utilities.
+
+These are implemented in one repository as a learning/research foundation; they are not yet fully integrated into one end-to-end pipeline.
+
+## Architecture At A Glance
+
+```text
+Web Page URL
+   -> crawler (robots-aware, depth-limited, same-host filter)
+   -> extracted links
+
+Text Documents (currently independent input path)
+   -> tokenize + normalize + stem
+   -> inverted index (token -> []docID)
+   -> search(term) and TF-IDF(term, docID)
+```
+
+## Technical Details
+
+### 1. Crawling (`crawler.go`)
+
+- Starts from `https://go.dev`.
+- Fetches and parses `robots.txt` using `github.com/temoto/robotstxt`.
+- Uses recursive depth-limited crawl (`depth` currently set to 2).
+- Extracts links from `<a href="...">` tags via `golang.org/x/net/html` tokenizer.
+- Normalizes links with `net/url` (`ResolveReference`, fragment removed).
+- Restricts traversal to same host.
+- Adds a polite delay (`500ms`) between page visits.
+
+### 2. Text Processing (`main.go`)
+
+`tokenize(content string)` performs:
+
+- lowercase conversion,
+- punctuation cleanup with regex `[^\w\s]`,
+- whitespace tokenization,
+- English stemming via `github.com/kljensen/snowball`.
+
+### 3. Inverted Index (`main.go`)
 
 `Add(documents []Document)` builds:
 
-- `map[string][]int`
-- key = token
-- value = list of document IDs where the token appears
+- `map[string][]int` where key is token and value is posting list of document IDs.
+- Repeated terms are stored as repeated doc IDs, enabling term-frequency counting later.
 
-Important detail:
-If a token appears multiple times in a document, that document ID appears multiple times in the postings list.  
-This is used by `TF_IDF` to count term frequency.
-
-### 3. Search
+### 4. Search (`main.go`)
 
 `Search(item string) []int`:
 
-- lowercases query token
-- returns postings list from index
-- returns empty slice if not found
+- lowercases the query term,
+- returns matching posting list,
+- returns empty slice if token is not present.
 
-### 4. TF-IDF
+### 5. TF-IDF (`main.go`)
 
 `TF_IDF(token string, docID int) float64` computes:
 
-- **TF (Term Frequency)** = occurrences of `token` in `docID` / total terms in `docID`
-- **IDF (Inverse Document Frequency)** = `ln(totalDocs / docsContainingToken)`
-- **TF-IDF** = `TF * IDF`
+- `TF = termCountInDoc / totalTermsInDoc`
+- `IDF = ln(totalDocs / docsContainingTerm)`
+- `score = TF * IDF`
 
-Implementation details:
+Guard clauses return `0` when data is missing or invalid.
 
-- safely returns `0` for missing/invalid cases
-- counts unique docs using a set
-- counts docs containing token using a set built from token postings
-
-## Run
+## How To Run
 
 From the `search-engine` folder:
 
@@ -68,36 +98,44 @@ From the `search-engine` folder:
 go run .
 ```
 
-## Current Demo Documents
+Current executable entrypoint is in `crawler.go` (`main()`).
+Typical current output begins with:
 
-Defined in `main.go`:
+```text
+Crawling (Depth 2): https://go.dev
+```
 
-1. `The quick brown fox jumps over the lazy dog.`
-2. `The lazy dog is sleeping.`
-3. `The fox is quick and clever.`
+## Code Map
 
-## Example Output (Search)
+- `crawler.go`: crawler entrypoint + crawling helpers.
+- `main.go`: document model + indexing/retrieval/scoring logic.
+- `go.mod`: module/dependency definitions.
 
-The current program prints:
+## Current Limitations (Important For Reviewers)
 
-- full inverted index
-- search results for:
-  - `the`
-  - `fox`
-  - `dog`
+- Crawler and indexer are not yet connected in one pipeline.
+- Link extraction currently keeps only absolute `http...` links; many relative links are ignored.
+- Query path does not currently stem tokens, while indexing does stem; this can reduce match quality.
+- Search is single-term and does not yet rank final results by score.
+- No persistent storage (index is in-memory only).
+- No benchmark suite or unit tests yet.
+- Crawler is single-threaded (no concurrency in traversal).
 
-## Notes and Limitations
+## Research Roadmap
 
-- Search is currently single-token only.
-- No ranking pipeline yet (TF-IDF is implemented, but not used to sort search results).
-- No stop-word removal (terms like `the`, `is` remain indexed).
-- No stemming/lemmatization in current code path.
-- No unit tests yet.
+Planned next iterations:
 
-## Suggested Next Improvements
+1. Connect crawler output to indexing pipeline end-to-end.
+2. Handle relative links before filtering to improve crawl coverage.
+3. Apply same normalization/stemming to query terms.
+4. Add ranked retrieval for multi-term queries.
+5. Add tests for tokenizer, index correctness, and TF-IDF calculations.
+6. Introduce evaluation metrics (precision@k, recall@k) on a small labeled dataset.
+7. Refactor into packages (`crawler`, `index`, `retrieval`, `scoring`) for maintainability.
 
-1. Rank search results by TF-IDF score.
-2. Add multi-term query handling.
-3. Add stop-word filtering and optional stemming.
-4. Add tests for tokenization, index correctness, and TF-IDF math.
-5. Split logic into packages (`index`, `search`, `scoring`) for cleaner structure.
+## Why This Project Is Valuable In Interviews
+
+- Shows understanding of core search engine concepts, not just framework usage.
+- Demonstrates backend engineering in Go with real parsing/networking libraries.
+- Makes tradeoffs visible (correctness-first prototype, then scaling roadmap).
+- Provides a clear path from academic IR concepts to practical implementation.
